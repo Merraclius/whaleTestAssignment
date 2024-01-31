@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+  bot:
+    build: .
+    command: "yarn dev"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    restart: always
+  redis:
+    image: redis:6
+    restart: always
