@@ -8,6 +8,7 @@ import { RedisService } from './redis.service';
 import { UserRolesEnum } from '../user-roles.enum';
 import { IUserModel } from '../models';
 import { BaseCommand } from '../commands/base-command';
+import { CommandsEnum } from '../commands/commands.enum';
 
 /**
  * Telegram bot service
@@ -51,19 +52,22 @@ export class TgBotService extends Bot {
         await Promise.all(commands.map(async (command) => {
             this.command(command.command,  
                 async (ctx) => {
-                    const user = await this.loadUserById(ctx.message!.from.id);
-                    
-                    if (!user) {
-                        await ctx.reply('Access denied');
-                        
-                        return;
-                    }
-                    
-                    if (!command.checkAccess(user.role)) {
-                        await ctx.reply('Access denied');
-                        
-                        return;
-                        
+                    // Quick hack to ignore checkAccess for the start command
+                    if (command.command !== CommandsEnum.START) {
+                        const user = await this.loadUserById(ctx.message!.from.id);
+
+                        if (!user) {
+                            await ctx.reply('Access denied');
+
+                            return;
+                        }
+
+                        if (!command.checkAccess(user.role)) {
+                            await ctx.reply('Access denied');
+
+                            return;
+
+                        }
                     }
                     
                     await command.handler(ctx, this)
